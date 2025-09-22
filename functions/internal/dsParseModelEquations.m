@@ -377,7 +377,7 @@ for index=1:length(text) % loop over lines of text
 
         then_action=groups{2};
         else_action=[];
-      elseif numel(groups==3)
+      elseif length(groups)==3 % TT edit 
         if groups{3}(end)==')'
           groups{3}=groups{3}(1:end-1);
         end

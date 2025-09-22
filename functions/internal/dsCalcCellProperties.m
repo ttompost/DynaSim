@@ -331,31 +331,36 @@ for p=1:num_pops
 
     % 5) calculate FI_slope (from avg over repetitions) Across suprathreshold steps with at least two spikes
     % FI slope: slope of f/I curve (firing freq vs injected current 0-140pA) (see [2])
-%     step_sel=find(num_spikes>1 & amplitudes'>0);
-%     amps=amplitudes(step_sel);
-%     uamps=unique(amps);
-%     nuamps=length(uamps);
-%     FR=nan(1,nuamps);
-%     % loop over unique amplitudes
-%     for a=1:nuamps
-%       asel=find(amps==uamps(a)); % indices to subthreshold amps with this value
-%       % loop over repetitions of the same amplitude
-%       fr=0;
-%       for l=1:length(asel)
-%         step=step_sel(asel(l)); % index to this simulation
-%         fr=fr+(num_spikes(step)/((offset-onset)/1000));
-%       end
-%       FR(a)=fr/length(asel); % [Hz]
-%     end
-%     % calc FI_slope
-%     if any(~isnan(FR))
-%       sel=~isnan(FR);
-%       amps_nA=uamps(sel)*experiment_options.membrane_area/CF/1000;
-%       P=polyfit(amps_nA,FR(sel),1);
-%       stats.(pop).FI_slope(c)=P(1); % [Hz/nA]
-%       figure; plot(amps_nA,FR(sel)); xlabel('amps [nA]'); ylabel('FR [Hz]');
-%       [num_spikes(step_sel) amplitudes(step_sel)']
-%     end
+    step_sel=find(num_spikes>1 & amplitudes'>0);
+    amps=amplitudes(step_sel);
+    uamps=unique(amps);
+    nuamps=length(uamps);
+    FR=nan(1,nuamps);
+    % loop over unique amplitudes
+    for a=1:nuamps
+      asel=find(amps==uamps(a)); % indices to subthreshold amps with this value
+      % loop over repetitions of the same amplitude
+      fr=0;
+      for l=1:length(asel)
+        step=step_sel(asel(l)); % index to this simulation
+%         fr=fr+(num_spikes(step)/((offset-onset)/1000)); % spike count
+        ISI=diff(spike_times{step,c}); % added Tompos 20th Feb 2023
+        fr=fr+(1./(mean(ISI)/1000)); % inverse isi % added Tompos 20th Feb 2023
+      end
+      FR(a)=fr/length(asel); % [Hz]
+    end
+    stats.cell_results(c).inst_FR_per_amp = {[zeros(1,length(amplitudes)-length(FR)) FR]}; % added Tompos 20th Feb 2023
+    % calc FI_slope
+    if any(~isnan(FR))
+      sel=~isnan(FR);
+      amps_nA=uamps(sel)*experiment_options.membrane_area/CF/1000;
+      P=polyfit(amps_nA,FR(sel),1);
+      stats.(pop).FI_slope(c)=P(1); % [Hz/nA]
+      if options.plot_flag % added Tompos 20th Feb 2023
+        figure; plot(amps_nA,FR(sel)); xlabel('amps [nA]'); ylabel('FR [Hz]');
+        [num_spikes(step_sel) amplitudes(step_sel)'];
+      end
+    end
 
     % 6) calculate ARs (avg over repetitions) & AR_coefficient Across
     %    suprathreshold steps >=60pA above first step with at least two spikes

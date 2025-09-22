@@ -13,7 +13,7 @@ netcon = rand(N_pre,N_post)<=prob_cxn
 scalingFactor = max(sum(netcon), 1)
 
 % functions
-IGABAa(X,s) = -gGABAa./scaleFactor.*(s*netcon).*(X-EGABAa)
+IGABAa(X,s) = -gGABAa./scalingFactor.*(s*netcon).*(X-EGABAa)
  
 % ODEs and ICs
 s' = -s./tauD + 1/2*(1+tanh(X_pre/10)).*((1-s)/tauR)

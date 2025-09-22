@@ -13,7 +13,7 @@ netcon = rand(N_pre,N_post)<=prob_cxn
 scalingFactor = max(sum(netcon), 1)
 
 % functions
-IAMPA(X,s) = -gAMPA./scaleFactor.*(s*netcon).*(X-EAMPA)
+IAMPA(X,s) = -gAMPA./scalingFactor.*(s*netcon).*(X-EAMPA)
  
 % ODEs and ICs
 s' = -s./tauD + 1/2*(1+tanh(X_pre/10)).*((1-s)/tauR)

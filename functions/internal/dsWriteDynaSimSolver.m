@@ -476,18 +476,22 @@ ndims_per_var=zeros(1,length(state_variables)); % number of dimensions
 sizes_per_var=cell(1,length(state_variables));
 
 % try to determine size of each state variable by evaluating IC expressions
-try
-  tmp=cellfun(@eval,IC_expressions,'uni',0);
-  nvals_per_var=cellfun(@numel,tmp);
-  for i=1:length(tmp)
-    if size(tmp{i},1)==1 %|| size(tmp{i},2)==1
-      ndims_per_var(i)=1;
-      sizes_per_var{i}=length(tmp{i});
-    else
-      ndims_per_var(i)=ndims(tmp{i});
-      sizes_per_var{i}=size(tmp{i});
+for i=1:length(IC_expressions)
+    try
+      % tmp=cellfun(@eval,IC_expressions,'uni',0);
+      % nvals_per_var=cellfun(@numel,tmp);
+      tmp=eval(IC_expressions{i});
+      nvals_per_var(i)=numel(tmp);
+      % for i=1:length(tmp)
+        if size(tmp,1)==1 %|| size(tmp{i},2)==1
+          ndims_per_var(i)=1;
+          sizes_per_var{i}=length(tmp);
+        else
+          ndims_per_var(i)=ndims(tmp);
+          sizes_per_var{i}=size(tmp);
+        end
+      % end
     end
-  end
 end
 
 for i=1:length(state_variables)
@@ -582,7 +586,7 @@ for i=1:length(state_variables)
       elseif ndims_per_var(i)==2
         % set var(:,:,1)=IC;
         fprintf(fid,'%s(:,:,1) = %s;\n',state_variables{i},IC_expressions{i});
-      else
+      else 
         error('only 1D and 2D populations are supported a this time.');
       end
     else
@@ -640,7 +644,7 @@ if ~isempty(model.monitors)
   monitor_expressions=struct2cell(model.monitors);
   index_nexts_mon=cell(1,length(monitor_names));
 
-  use_monitor_sizes = any(ndims_per_var>1);
+  use_monitor_sizes = 0;%any(ndims_per_var>1); % TT: i changed this to 0 because it was causing problems
     % TODO: establish better condition for determining whether monitor sizes
     % should be calculated by evaluating mon_f(IC) at this point. For now, it
     % is done only if any state variables are 2D; otherwise, monitors are
@@ -740,11 +744,11 @@ if ~isempty(model.monitors)
 
         if isnumeric(spike_threshold)
           model.conditionals(end).condition=...
-            sprintf('any(%s%s>=%g&%s%s<%g)',var_spikes,index_curr,spike_threshold,var_spikes,index_last,spike_threshold);
-        else
+            sprintf('(%s%s>=%g&%s%s<%g)',var_spikes,index_curr,spike_threshold,var_spikes,index_last,spike_threshold);
+        else % TT edit: removed "any" in front of the bracket
           model.conditionals(end).condition=...
-            sprintf('any(%s%s>=%s&%s%s<%s)',var_spikes,index_curr,spike_threshold,var_spikes,index_last,spike_threshold);
-        end
+            sprintf('(%s%s>=%s&%s%s<%s)',var_spikes,index_curr,spike_threshold,var_spikes,index_last,spike_threshold);
+        end % TT edit: removed "any" in front of the bracket
 
         action1=sprintf('%s(n,conditional_indx)=1',monitor_names{i});
         action2=sprintf('inds=find(conditional_indx); for j=1:length(inds), i=inds(j); %s(%s(i),i)=t; %s(i)=mod(-1+(%s(i)+1),%g)+1; end',var_tspikes,var_buffer_index,var_buffer_index,var_buffer_index,spike_buffer_size);
@@ -908,8 +912,8 @@ if ~isempty(model.monitors)
         elseif ndims_per_mon(i)==2
           % set mon(:,:,1)=f(IC);
           print_monitor_update(fid,0,tmp_mon,'(:,:,1)',state_variables,tmp_var_index,varargin{:});
-        else
-          error('only 1D and 2D populations are supported at this time.');
+        else 
+        error('only 1D and 2D populations are supported a this time.');
         end
       else
         if ndims_per_mon(i)==1
@@ -1039,7 +1043,15 @@ for i=1:length(odes)
         wrong_linkers=[wrong_linkers, ', @', tmp{j}];
       end
     end
-    error('Referencing non-existing linkers: %s –. Please fix your Dynasim mechanisms.\n\n', wrong_linkers);
+    error('Referencing non-existing linkers: %s –. Please fix your Dynasim mechanisms.\n\n', wrong_linkers); % this is a bit too dramatic, I will just erase the linker out of the ODE
+%     %%% start new code TTompos 26-Mar-2023
+%     start_idx = strfind(odes{i},wrong_linkers);
+%     if isstrprop(odes{i}(start_idx-2),'alphanum')
+%         odes{i}=erase(odes{i},odes{i}(start_idx-1:start_idx+length(wrong_linkers)-1));
+%     elseif isstrprop(odes{i}(start_idx-3),'alphanum')
+%         odes{i}=erase(odes{i},odes{i}(start_idx-2:start_idx+length(wrong_linkers)-1));
+%     end
+%     %%% end new code TTompos 26-Mar-2023
   end
 end
 
@@ -1404,7 +1416,13 @@ function print_conditional_update(fid,conditionals,index_nexts,state_variables, 
       action = {action};
     end
     for j=1:length(condition)
-      fprintf(fid,['  conditional_test=any(%s);\n'],condition{j}); % JSS edit
+        % TT edit begin
+        if contains(condition{j}, '(n,:)') % 1D
+            fprintf(fid,['  conditional_test=any(%s);\n'],condition{j}); % JSS edit
+        elseif contains(condition{j}, '(:,:,n)') % 2D
+            fprintf(fid,['  conditional_test=any(any(%s));\n'],condition{j});
+        end
+        % TT edit end
       % fprintf(fid,['  conditional_test=(%s);\n'],condition{j});
 %     if ~isempty(strfind(condition{j},'any('))
 %         condition_indx = regexprep(condition{j},'^any\(','','once');
