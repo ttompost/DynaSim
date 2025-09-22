@@ -1,0 +1,25 @@
+% Hodgkin-Huxley potassium current
+% parameters
+gK=0.005e3 % mS/cm2
+EK=-100 % mV
+K_off_N = -37 % mV
+K_slope_N = 11.38 % mV
+K_decay = 3; % ms
+IC_noise=0; n_IC=0
+
+% functions
+tau_n(X) = K_decay % ms
+n_inf(X) = 1./(1+exp(-(X-K_off_N)/K_slope_N))
+IK(X,n) = -gK.*n.^4.*(X-EK)
+
+% ODEs and ICs
+n' = (n_inf(X)-n)./tau_n(X)
+n(0)=n_IC+IC_noise*rand(1,Npop)
+
+% linkers
+@current += IK(X,n)
+
+
+%%% REFERENCE
+% Zou, Quan, Yannick Bornat, Sylvain Saïghi, Jean Tomas, Sylvie Renaud, and Alain Destexhe. “Analog-Digital Simulations of Full Conductance-Based Networks of Spiking Neurons with Spike Timing Dependent Plasticity.” Network (Bristol, England) 17, no. 3 (September 2006): 211–33. https://doi.org/10.1080/09548980600711124.
+

@@ -1,0 +1,13 @@
+% learning signal
+EndTime = 100 % ms
+TimePoints = 0:dt:EndTime
+
+cue = randn(length(TimePoints),N_pop)
+
+% k is used to retrieve a value at the current time point, that is how the solver is set
+L(t) = cue(k,:)
+
+monitor L
+
+@current += L(t)
+@input_signal += L(t)

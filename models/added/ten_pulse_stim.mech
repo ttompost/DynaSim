@@ -1,0 +1,61 @@
+% Istim(t): 5 pulse stimulus
+pulse_amp=10
+pulse_freq = 5 % Hz
+pulse_interval = (1/pulse_freq)*1000; % calculates time in ms
+pulse_dur = 1 % ms
+
+onset1=0 	% onset [ms] of stimulation
+offset1= onset1+pulse_dur
+
+onset2=onset1+pulse_interval
+offset2=onset2+pulse_dur
+
+onset3=onset2+pulse_interval	
+offset3=onset3+pulse_dur
+
+onset4=onset3+pulse_interval	
+offset4=onset4+pulse_dur
+
+onset5=onset4+pulse_interval	
+offset5=onset5+pulse_dur
+
+onset6=onset5+pulse_interval
+offset6=onset6+pulse_dur
+
+onset7=onset6+pulse_interval	
+offset7=onset7+pulse_dur
+
+onset8=onset7+pulse_interval	
+offset8=onset8+pulse_dur
+
+onset9=onset8+pulse_interval	
+offset9=onset9+pulse_dur
+
+onset10=onset9+pulse_interval	
+offset10=onset10+pulse_dur
+
+Istim1(t) = pulse_amp*(t>=onset1 & t<offset1)
+Istim2(t) = pulse_amp*(t>=onset2 & t<offset2)
+Istim3(t) = pulse_amp*(t>=onset3 & t<offset3)
+Istim4(t) = pulse_amp*(t>=onset4 & t<offset4)
+Istim5(t) = pulse_amp*(t>=onset5 & t<offset5)
+Istim6(t) = pulse_amp*(t>=onset6 & t<offset6)
+Istim7(t) = pulse_amp*(t>=onset7 & t<offset7)
+Istim8(t) = pulse_amp*(t>=onset8 & t<offset8)
+Istim9(t) = pulse_amp*(t>=onset9 & t<offset9)
+Istim10(t) = pulse_amp*(t>=onset10 & t<offset10)
+
+fullstim(t) = Istim1(t) + Istim2(t) + Istim3(t) + Istim4(t) + Istim5(t) + Istim6(t) + Istim7(t) + Istim8(t) + Istim9(t) + Istim10(t)
+
+@current += Istim1(t)
+@current += Istim2(t)
+@current += Istim3(t)
+@current += Istim4(t)
+@current += Istim5(t)
+@current += Istim6(t)
+@current += Istim7(t)
+@current += Istim8(t)
+@current += Istim9(t)
+@current += Istim10(t)
+
+monitor fullstim

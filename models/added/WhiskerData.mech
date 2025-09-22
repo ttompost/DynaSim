@@ -1,0 +1,17 @@
+% Convolved whisker angle + convolved whisker curvature
+
+signal_scale = 1
+
+EndTime = 100 % ms
+TimePoints = 0:dt:EndTime
+
+ConvAng = ones(length(TimePoints),N_pop)
+ConvCurv = ones(length(TimePoints),N_pop)
+
+% k is used to retrieve a value at the current time point, that is how the solver is set
+W(t) = (ConvAng(k,:) + ConvCurv(k,:)).* signal_scale 
+
+monitor W
+
+@current += W(t)
+

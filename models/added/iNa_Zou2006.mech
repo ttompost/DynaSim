@@ -1,0 +1,33 @@
+% Hodgkin-Huxley sodium current
+% parameters
+gNa=0.05e3 % max sodium conductance, mS/cm2
+ENa=50 % mV
+Na_off_M = -37 % mV
+Na_slope_M = 7.2 % mV
+Na_off_H = -42 % mV
+Na_slope_H = -4.6 % mV
+Na_c1 = 15 % slope 
+Na_c2 = 0 % mV
+Na_c3 = 0.25 % ms
+Na_c0 = 3 - Na_c3 % ms
+IC_noise=0; h_IC=0; m_IC=0
+
+% functions
+tau_m(X) = 0.03 % ms
+m_inf(X) = 1./(1+exp(-(X-Na_off_M)/Na_slope_M))
+tau_h(X) = Na_c3 + Na_c0./(1+exp(-Na_c1*(X-Na_c2)))
+h_inf(X) = 1./(1+exp((X-Na_off_H)/Na_slope_H))
+INa(X,m,h) = -gNa.*m.^3.*h.*(X-ENa)
+
+% ODEs and ICs
+m' = (m_inf(X)-m)./tau_m(X)
+h' = (h_inf(X)-h)./tau_h(X)
+h(0)=h_IC+IC_noise*rand(1,Npop)
+m(0)=m_IC+IC_noise*rand(1,Npop)
+
+% linkers
+@current += INa(X,m,h)
+
+
+%%% REFERENCE
+% Zou, Quan, Yannick Bornat, Sylvain Saïghi, Jean Tomas, Sylvie Renaud, and Alain Destexhe. “Analog-Digital Simulations of Full Conductance-Based Networks of Spiking Neurons with Spike Timing Dependent Plasticity.” Network (Bristol, England) 17, no. 3 (September 2006): 211–33. https://doi.org/10.1080/09548980600711124.

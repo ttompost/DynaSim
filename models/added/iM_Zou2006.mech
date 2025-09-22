@@ -1,0 +1,29 @@
+% iM: muscarinic receptor suppressed, slow, noninactivating potassium current (ref: Kramer/Kopell 2008)
+% Tags: M-current, potassium, channel, intrinsic
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Parameters
+E_M = -100 % mV
+gM = 45.5e-3 % mS/cm2; weakly adapting, so increase for stronger adaptation
+mM_off = -35 % mV
+mM_slope = 11.4 % mV
+mM_c1 = 15 % slope 
+mM_c2 = 0 % mV
+mM_c3 = 8 % ms
+mM_c0 = 300 - mM_c3 % ms
+IC = 0; IC_noise=0;
+
+% Functions
+tau_mM(X) = mM_c3 + mM_c0./(1+exp(-mM_c1*(X-mM_c2)))
+mM_inf(X) = 1./(1+exp((X-mM_off)/mM_slope))
+IM(X,m) = -gM.*m.*(X-E_M)
+
+% ODE
+mM' = (mM_inf(X)-mM)./tau_mM(X)
+mM(0)=IC+IC_noise.*rand(Npop,1)
+
+% Interface
+@current += IM(X,mM)
+
+%%% REFERENCE
+% Zou, Quan, Yannick Bornat, Sylvain Saïghi, Jean Tomas, Sylvie Renaud, and Alain Destexhe. “Analog-Digital Simulations of Full Conductance-Based Networks of Spiking Neurons with Spike Timing Dependent Plasticity.” Network (Bristol, England) 17, no. 3 (September 2006): 211–33. https://doi.org/10.1080/09548980600711124.
+

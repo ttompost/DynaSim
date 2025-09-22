@@ -1,0 +1,16 @@
+% RS (adapted from Zou 2006)
+% usage: dsPlot(dsSimulate('RS','vary',{'RS','Iapp',5}))
+
+RS:
+dV/dt=(Iapp+@current)./Cm; {iNa_Zou2006,iK_Zou2006,iM_Zou2006,ileak}@current; V(0)=-65*ones(1,N_pop)
+Iapp = 0;
+Cm=1; % uF/cm2
+
+% leak
+gleak = 0.00015e3 % mS/cm2
+Eleak = -80 % mV
+
+
+
+%%% REFERENCE
+% Zou, Quan, Yannick Bornat, Sylvain Saïghi, Jean Tomas, Sylvie Renaud, and Alain Destexhe. “Analog-Digital Simulations of Full Conductance-Based Networks of Spiking Neurons with Spike Timing Dependent Plasticity.” Network (Bristol, England) 17, no. 3 (September 2006): 211–33. https://doi.org/10.1080/09548980600711124.

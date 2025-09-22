@@ -1,0 +1,14 @@
+% Istim(t): 1 pulse stimulus
+pulse_amp=10
+pulse_dur = 1 % ms
+
+onset1=0 	% onset [ms] of stimulation
+offset1= onset1+pulse_dur
+
+sig = ones(1,N_pop)
+
+Istim1(t) = pulse_amp.*sig.*(t>=onset1 & t<offset1)
+
+@current += Istim1(t)
+
+monitor Istim1

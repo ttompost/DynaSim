@@ -1,0 +1,19 @@
+% Istim(t): 1 pulse stimulus
+pulse_amp=10
+pulse_freq = 5 % Hz
+pulse_interval = (1/pulse_freq)*1000; % calculates time in ms
+pulse_dur = 1 % ms
+
+onset1=0 	% onset [ms] of stimulation
+offset1= onset1+pulse_dur
+
+onset2=onset1+pulse_interval
+offset2=onset2+pulse_dur
+
+Istim1(t) = pulse_amp*(t>=onset1 & t<offset1)
+Istim2(t) = pulse_amp*(t>=onset2 & t<offset2)
+
+@current += Istim1(t)
+@current += Istim2(t)
+
+monitor Istim1

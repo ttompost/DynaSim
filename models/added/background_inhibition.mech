@@ -1,0 +1,13 @@
+% time-varying signal
+EndTime = 100 % ms
+TimePoints = 0:dt:EndTime
+
+back_i = randn(length(TimePoints),N_pop)
+
+% k is used to retrieve a value at the current time point, that is how the solver is set
+S(t) = back_i(k,:)
+
+monitor S
+
+@current += S(t)
+@input_signal += S(t)
